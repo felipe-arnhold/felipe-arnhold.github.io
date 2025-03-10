@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ABC Notation to SVG</title>
+    <script src="https://paulrosen.github.io/abcjs/abcjs-basic-min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            text-align: center;
+        }
+        textarea {
+            width: 80%;
+            height: 150px;
+            margin-bottom: 10px;
+        }
+        #output {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>ABC Notation to SVG Converter</h2>
+    <textarea id="abcInput" placeholder="Enter ABC notation here...">X:1
+T:Scale
+M:4/4
+L:1/4
+K:C
+C D E F | G A B c ||</textarea>
+    <br>
+    <button onclick="convertABCtoSVG()">Convert</button>
+
+    <div id="output"></div>
+
+    <script>
+        function convertABCtoSVG() {
+            let abcNotation = document.getElementById("abcInput").value;
+            let outputDiv = document.getElementById("output");
+
+            // Clear previous output
+            outputDiv.innerHTML = "";
+
+            ABCJS.renderAbc("output", abcNotation);
+        }
+    </script>
+
+</body>
+</html>
