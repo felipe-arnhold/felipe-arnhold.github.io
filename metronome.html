@@ -16,8 +16,6 @@
     </style>
 </head>
 <body>
-    <h1>Metronome Player</h1>
-    <p>BPM: <span id="bpm-display">120</span></p>
     <div class="controls">
         <button onclick="startMetronome()">Start</button>
         <button onclick="stopMetronome()">Stop</button>
@@ -33,7 +31,6 @@
             if (bpmParam && !isNaN(bpmParam)) {
                 bpm = parseInt(bpmParam, 10);
             }
-            document.getElementById("bpm-display").textContent = bpm;
         }
 
         function startMetronome() {
