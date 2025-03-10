@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ABC to SVG</title>
-    <script src="http://moinejf.free.fr/js/abcweb-1.js"></script>
+    <script src="https://paulrosen.github.io/abcjs/abcjs-min.js" defer></script>
     <style>
         body {
             margin: 0;
@@ -19,21 +19,32 @@
     <div id="output"></div>
 
     <script>
-        function getQueryParam(name) {
-            const params = new URLSearchParams(window.location.search);
-            return params.get(name);
-        }
+        document.addEventListener("DOMContentLoaded", function () {
+            function getQueryParam(name) {
+                const params = new URLSearchParams(window.location.search);
+                return params.get(name);
+            }
 
-        function renderABC(abcNotation) {
-            if (!abcNotation) return;
-            let outputDiv = document.getElementById("output");
-            outputDiv.innerHTML = "";
-            ABCJS.renderAbc("output", abcNotation);
-        }
+            function renderABC(abcNotation) {
+                if (!abcNotation || typeof ABCJS === "undefined") return;
 
-        const abcData = getQueryParam("abc");
-        let outputDiv = document.getElementById("output");
-        outputDiv.innerHTML = abcData;
+                let outputDiv = document.getElementById("output");
+                outputDiv.innerHTML = ""; // Clear previous output
+
+                // Ensure ABCJS is available before rendering
+                if (ABCJS && typeof ABCJS.renderAbc === "function") {
+                    ABCJS.renderAbc("output", abcNotation);
+                } else {
+                    console.error("ABCJS failed to load.");
+                }
+            }
+
+            // Wait for ABCJS to be loaded
+            window.addEventListener("load", function () {
+                const abcData = getQueryParam("abc");
+                renderABC(abcData);
+            });
+        });
     </script>
 </body>
 </html>
