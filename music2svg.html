@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ABC to SVG</title>
-    <script src="https://paulrosen.github.io/abcjs/abcjs-min.js" defer></script>
+    <script src="http://moinejf.free.fr/js/abcweb-1.js"></script>
+    <script src="http://moinejf.free.fr/js/snd-1.js"></script>
     <style>
         body {
             margin: 0;
@@ -16,35 +17,18 @@
     </style>
 </head>
 <body>
-    <div id="output"></div>
+    <script id="output" type="text/vnd.abc"></script>
 
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            function getQueryParam(name) {
-                const params = new URLSearchParams(window.location.search);
-                return params.get(name);
-            }
-
-            function renderABC(abcNotation) {
-                if (!abcNotation || typeof ABCJS === "undefined") return;
-
-                let outputDiv = document.getElementById("output");
-                outputDiv.innerHTML = ""; // Clear previous output
-
-                // Ensure ABCJS is available before rendering
-                if (ABCJS && typeof ABCJS.renderAbc === "function") {
-                    ABCJS.renderAbc("output", abcNotation);
-                } else {
-                    console.error("ABCJS failed to load.");
-                }
-            }
-
-            // Wait for ABCJS to be loaded
-            window.addEventListener("load", function () {
-                const abcData = getQueryParam("abc");
-                renderABC(abcData);
-            });
-        });
+       
+        function getQueryParam(name) {
+            const params = new URLSearchParams(window.location.search);
+            return params.get(name);
+        }
+        
+        const abcData = getQueryParam("abc");
+        let outputDiv = document.getElementById("output");
+        outputDiv.innerHTML = abcData;
     </script>
 </body>
 </html>
