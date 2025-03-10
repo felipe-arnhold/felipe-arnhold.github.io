@@ -27,8 +27,12 @@
         let bpm = 120;
         let metronomeInterval;
         
-        function updateBPM(newBpm) {
-            bpm = newBpm;
+        function getBPMFromURL() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const bpmParam = urlParams.get('bpm');
+            if (bpmParam && !isNaN(bpmParam)) {
+                bpm = parseInt(bpmParam, 10);
+            }
             document.getElementById("bpm-display").textContent = bpm;
         }
 
@@ -61,10 +65,8 @@
             oscillator.stop(audioCtx.currentTime + 0.1);
         }
 
-        // Example JSON input
-        const jsonInput = '{ "bpm": 90 }';
-        const parsedData = JSON.parse(jsonInput);
-        updateBPM(parsedData.bpm);
+        // Get BPM from URL on load
+        getBPMFromURL();
     </script>
 </body>
 </html>
