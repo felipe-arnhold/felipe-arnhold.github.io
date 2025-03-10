@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="frame-ancestors *;">
     <title>Metronome Player</title>
     <style>
         body {
@@ -10,17 +11,9 @@
             text-align: center;
             margin-top: 50px;
         }
-        .controls {
-            margin-top: 20px;
-        }
     </style>
 </head>
 <body>
-    <div class="controls">
-        <button onclick="startMetronome()">Start</button>
-        <button onclick="stopMetronome()">Stop</button>
-    </div>
-
     <script>
         let bpm = 120;
         let metronomeInterval;
@@ -28,8 +21,14 @@
         function getBPMFromURL() {
             const urlParams = new URLSearchParams(window.location.search);
             const bpmParam = urlParams.get('bpm');
+            const autoStart = urlParams.get('autoStart');
+            
             if (bpmParam && !isNaN(bpmParam)) {
                 bpm = parseInt(bpmParam, 10);
+            }
+            
+            if (autoStart === 'true') {
+                startMetronome();
             }
         }
 
@@ -62,7 +61,7 @@
             oscillator.stop(audioCtx.currentTime + 0.1);
         }
 
-        // Get BPM from URL on load
+        // Get BPM and autoStart from URL on load
         getBPMFromURL();
     </script>
 </body>
