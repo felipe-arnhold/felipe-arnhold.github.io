@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ABC to SVG</title>
+    <script src="https://paulrosen.github.io/abcjs/abcjs-basic-min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+    </style>
+</head>
+<body>
+    <div id="output"></div>
+
+    <script>
+        function getQueryParam(name) {
+            const params = new URLSearchParams(window.location.search);
+            return params.get(name);
+        }
+
+        function getPostData(callback) {
+            if (window.location.search) {
+                callback(getQueryParam("abc"));
+            } else if (window.location.pathname === "/" || window.location.pathname.endsWith("index.html")) {
+                fetch(window.location.href, {
+                    method: "POST",
+                    headers: { "Content-Type": "text/plain" },
+                })
+                .then(response => response.text())
+                .then(callback)
+                .catch(console.error);
+            }
+        }
+
+        function renderABC(abcNotation) {
+            if (!abcNotation) return;
+            let outputDiv = document.getElementById("output");
+            outputDiv.innerHTML = "";
+            ABCJS.renderAbc("output", abcNotation);
+        }
+
+        getPostData(renderABC);
+    </script>
+</body>
+</html>
