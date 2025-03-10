@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Metronome Player</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+        .controls {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Metronome Player</h1>
+    <p>BPM: <span id="bpm-display">120</span></p>
+    <div class="controls">
+        <button onclick="startMetronome()">Start</button>
+        <button onclick="stopMetronome()">Stop</button>
+    </div>
+
+    <script>
+        let bpm = 120;
+        let metronomeInterval;
+        
+        function updateBPM(newBpm) {
+            bpm = newBpm;
+            document.getElementById("bpm-display").textContent = bpm;
+        }
+
+        function startMetronome() {
+            if (metronomeInterval) clearInterval(metronomeInterval);
+            
+            const interval = (60 / bpm) * 1000; // Convert BPM to milliseconds
+            
+            metronomeInterval = setInterval(playTick, interval);
+        }
+
+        function stopMetronome() {
+            clearInterval(metronomeInterval);
+        }
+
+        function playTick() {
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            
+            oscillator.type = "square";
+            oscillator.frequency.setValueAtTime(1000, audioCtx.currentTime); 
+            gainNode.gain.setValueAtTime(1, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            
+            oscillator.start(audioCtx.currentTime);
+            oscillator.stop(audioCtx.currentTime + 0.1);
+        }
+
+        // Example JSON input
+        const jsonInput = '{ "bpm": 90 }';
+        const parsedData = JSON.parse(jsonInput);
+        updateBPM(parsedData.bpm);
+    </script>
+</body>
+</html>
