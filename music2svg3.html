@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+    "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<script src="http://moinejf.free.fr/js/snd-1.js" type="text/javascript"></script>
+<script src="http://moinejf.free.fr/js/abc2svg-1.js" type="text/javascript"></script>
+<title>ABC edit with abc2svg</title>
+</head>
+<body ontouchstart="" bgcolor="#faf0e6" spellcheck="false">
+    <div id="target">
+        <svg xmlns="http://www.w3.org/2000/svg"
+            xmlns:xlink="http://www.w3.org/1999/xlink"
+            xml:space="preserve"
+            width="8.3in" height="2in" viewBox="0 0 595 144">
+        <text x="250" y="100" font-family="serif" font-size="12">(void)</text>
+        </svg>
+    </div>
+
+    <script>
+        function getQueryParam(name) {
+            const params = new URLSearchParams(window.location.search);
+            return params.get(name);
+        }
+
+        abc2svg.abc_end = function() {}
+
+        var content = getQueryParam('abc');
+        var abc_images, abc_fname = ["noname.abc", ""];
+        var abc;
+        var user = {
+            read_file: function(fn) {
+                return null;
+            },
+            errbld: function(sev, txt, fn, idx) {
+                var msg = sev + ' ' + clean_txt(txt)
+                console.log(msg);
+            },
+            img_out: function(str) {
+                abc_images += str
+            },
+            anno_stop: function(type, start, stop, x, y, w, h, s) {
+                if (["beam", "slur", "tuplet"].indexOf(type) >= 0)
+                    return
+                abc.out_svg('<rect class="abcr _' + start + '_" x="');
+                abc.out_sxsy(x, '" y="', y);
+                abc.out_svg('" width="' + w.toFixed(2) + '" height="' + abc.sh(h).toFixed(2) + '"/>\n')
+            },
+            page_format: false
+        }
+
+        function render(){
+            abc = new abc2svg.Abc(user);
+            abc_images = '';
+
+            try {
+                abc.tosvg(abc_fname[0], content);
+            } catch (e) {
+                alert(e.message + '\nabc2svg tosvg bug - stack:\n' + e.stack);
+                return;
+            }
+
+            abc2svg.abc_end();
+            document.getElementById("target").innerHTML = abc_images;
+        }
+
+        function combineSvgs(){
+            // 1. Select the target container and all SVGs within it.
+            const target = document.getElementById('target');
+            const allSVGs = target.querySelectorAll('svg');
+
+            // 2. Create a single combined SVG.
+            const combinedSVG = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+
+            // Copy all attributes from the FIRST svg
+            if (allSVGs.length > 0) {
+                const firstSVG = allSVGs[0];
+                firstSVG.getAttributeNames().forEach((attrName) => {
+                // Copy each attribute to the combined SVG
+                combinedSVG.setAttribute(attrName, firstSVG.getAttribute(attrName));
+                });
+            }
+
+            // We’ll calculate exact bounding box to set width, height, and viewBox.
+            let minX = Infinity;
+            let minY = Infinity;
+            let maxX = -Infinity;
+            let maxY = -Infinity;
+
+            // 3. Find bounding box of every sub-SVG to compute overall size.
+            //    Also prepare to store offsets.
+            const subSVGData = [];
+            const targetRect = target.getBoundingClientRect();
+
+            allSVGs.forEach((subSVG) => {
+                const subRect = subSVG.getBoundingClientRect();
+
+                // Calculate offset relative to the #target container
+                const offsetX = subRect.left - targetRect.left;
+                const offsetY = subRect.top - targetRect.top;
+
+                // Update overall min/max
+                minX = Math.min(minX, offsetX);
+                minY = Math.min(minY, offsetY);
+                maxX = Math.max(maxX, offsetX + subRect.width);
+                maxY = Math.max(maxY, offsetY + subRect.height);
+
+                // Save data for the next pass
+                subSVGData.push({ node: subSVG, offsetX, offsetY, width: subRect.width, height: subRect.height });
+            });
+
+            // 4. Determine the final bounding box dimensions for combined SVG
+            const finalWidth = maxX - minX;
+            const finalHeight = maxY - minY;
+
+            // 5. Set the combined SVG’s width, height, and viewBox
+            combinedSVG.setAttribute('width', finalWidth);
+            combinedSVG.setAttribute('height', finalHeight);
+            combinedSVG.setAttribute('viewBox', `0 0 ${finalWidth} ${finalHeight}`);
+
+            // 6. Now copy the contents of each sub-SVG into the combined SVG,
+            //    adjusting the transform so that everything is placed correctly
+
+            subSVGData.forEach(({ node: subSVG, offsetX, offsetY }) => {
+                // Create a group to hold this sub-SVG’s elements
+                const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+
+                // Shift so that minX/minY is effectively the origin
+                g.setAttribute('transform', `translate(${offsetX - minX}, ${offsetY - minY})`);
+
+                // Move all child nodes from the original sub-SVG into the group
+                while (subSVG.firstChild) {
+                    g.appendChild(subSVG.firstChild);
+                }
+
+                // Append group to combined SVG
+                combinedSVG.appendChild(g);
+            });
+
+            // 7. Add the combined SVG to the DOM (for example, at the end of body)
+            // document.getElementById("target") = combinedSVG;
+            //document.body.appendChild(combinedSVG);
+            //target.style.display = 'none';
+            document.body.innerHTML = '';
+            document.body.style.margin = '0';
+            document.body.style.padding = '0';
+            document.body.appendChild(combinedSVG);
+
+            return
+        }
+
+        console.log(content);
+        render();
+        combineSvgs();
+    </script>
+</body>
+</html>
